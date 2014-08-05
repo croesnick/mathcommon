@@ -1,0 +1,52 @@
+\documentclass{scrartcl}
+
+\usepackage{a4wide}
+\usepackage{mathcommon}
+
+\begin{document}
+
+\begin{itemize}
+\item Brackets: $\bsx{\{}(x^{y^z}){\}}$, $\bsx\{(x^{y^z})\}$.
+\item Constants:
+	\[
+		\diff{f}[n](z_0) = \frac{n!}{2\uppi\iu}
+			\int_{\gamma} \frac{f(z)}{(z-z_0)^{n+1}} \dop(z)
+	\]
+\item Binary strings: $\Sigma \dfeq \st{\bz,\bo}$, $\eword \in \Sigma^\ast$.
+\item Quantifier: $\all{x}{\IR}(\ec^x > 0)$; $\some{A}{B}(C)$; $\some!{N}{B}$
+\item Assignments: $x \dfeq 1$ and $2 \dfeqrev y \in \IN$.
+\item Implications: $X \implies Y$, but $Y \notimplies X$, thus $X \notiff Y$.
+\item Some sets: $\IN+ \dfeq \IN \setminus \st{0} \subset \IZ \subset \IR$.
+\item Intervals: TODO
+\item Set notation: $\st{A}$, $\st{A}{B}$.
+\item Distance functions:
+	$\dist(x) \dfeq \dist[\ndot]{S}(x) \dfeq \inf_{y \in S} \norm(x-y)$.
+\item Absolute value: $\abs(x) \dfeq \max\st{-x,x}$.
+\item Topological properties:
+	$S = \inner{S} \cup \boundary{S} \cup X \setminus S$ for $S \subseteq X$.
+\item Norms: $\norm(x-y)[\infty]$ und $\ndot[\infty]$.
+\item Balls: open $\opb{x}{2^{-n}} \dfeq \opb[\ndot]{x}{2^{-n}}$
+	and closed $\clb{x}{2^{-n}}$.
+\item Some functions: $\id \dfeq \id[X]$, $\round(x) \in \IN$.
+\item Logarithms: $\logbx<1>{\mathrm{mylog}}(x)$,
+	$\lb A \dfeq \lb(A) \dfeq \logx[2](A)$.
+\item Function notation:
+	$f \dffn X \to Y$ (total),
+	$f \dfparfn X \to Y$ (partial),
+	$f \dffn X \surto Y$ (surjective),
+	$f \dffn X \into Y$ (injective),
+	$f \dffn X \mto Y$ (multi-valued),
+	$\dom(f) = X$, $\cod(f) = Y$, $\img(f) = f[X]$.
+\item Classes: $\cfn{[-1,1]}{\IR} \dfeq \civ[-1,1]$,
+	$\fnClass{\mathrm{Lip}}<1>(\infty)[L]{[-1,1]^d}{\IR^d}$
+	(smooth $L$-Lipschitz functions)
+\item Differential operator (to be used in integrals):
+	$\int_K f(x) \dop(x)$, $\dop(x,y,z,\phi,\theta)$
+\item Derivatives: $\diff{f}$ and $\diff{f}[i]$,
+	$\pdo[x]{f}(0)$.
+\item Truncated factorials:
+	$\fcut{m}{k} \dfeq \frac{m}{(m-k)!} = m \cdot (m-1) \cdots (m-k+1)$.
+\item Landau-Symbole: $\bigO$, $\bigO<1>(f)$, $\litO$, $\litO(g)$.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,363 @@
+% TODO introduce option 'slides' which changes mathrm to mathsf
+\ProvidesPackage{mathcommon}
+
+\RequirePackage{ifthen}
+\RequirePackage{xparse}
+\RequirePackage{xstring} % for \IfInteger
+\RequirePackage{amssymb}
+\RequirePackage{upgreek}
+\RequirePackage{mathtools}
+\RequirePackage{centernot}
+
+
+%%% Typography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Fixes a spacing problem with bigger versions of brackets
+\let\originalleft\left
+\let\originalright\right
+\renewcommand{\left}{\mathopen{}\mathclose\bgroup\originalleft}
+\renewcommand{\right}{\aftergroup\egroup\originalright}
+
+% TODO Document & move
+\newcommand{\eqnsp}{\;}
+
+% Bracket sizes
+\newcommand{\bs}[2]{%
+	\ifthenelse{\equal{#1}{0}}{}{
+	\ifthenelse{\equal{#1}{1}}{\big}{
+	\ifthenelse{\equal{#1}{2}}{\Big}{
+	\ifthenelse{\equal{#1}{3}}{\bigg}{
+	\ifthenelse{\equal{#1}{4}}{\Bigg}{
+	#2}}}}}
+}
+% Command for adjusting bracket sizes
+% Usage:   \bsx<bracket size (auto)>{left bracket}(argument){right bracket}
+% Example: \bsx\{(1,2)\} yields \{1,2\}
+% Note:    The brackets (in general: single tokens) do not have to be
+%          surrounded by curly brackets. It is therefore possible to use the
+%          the above shorter command instead of \bsx{\{}(1,2){\}}
+\NewDocumentCommand{\bsx}{D<>{auto} m r() m}{%
+	\bs{#1}{\left}#2 #3 \bs{#1}{\right}#4
+}
+
+
+%%% Basic mathematical notions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% [u]nary version of \subset(eq)
+% To be used to indicate subclasses of X: \usubseteq X
+\newcommand{\usubset}{\mathnormal\subset}
+\newcommand{\usubseteq}{\mathnormal\subseteq}
+
+%% Constants
+%%%%%%%%%%%%
+
+% imaginary unit
+\newcommand{\iu}{\mathrm{i}}
+% Euler constant
+\newcommand{\ec}{\mathrm{e}}
+% [e]mpty word, i.e., binary string of length 0
+% (requires \upgreek)
+\newcommand{\eword}{\upvarepsilon}
+% [b]inary [z]ero and [b]inary [o]ne
+\newcommand{\bz}{\mathtt{0}}
+\newcommand{\bo}{\mathtt{1}}
+% Unspeficied [param]eter for [l]ambda expression
+\newcommand{\lparam}{\textrm{-}}
+
+%% Quantifier
+%%%%%%%%%%%%%
+
+% Universal and existential quantifier
+% Usage:    \all<o:bracket size>{variables}{o:set}(o:statement)
+% Examples: \all{t} f(t) produces \forall t. f(t)
+%           \all{t}{T} f(t) produces \forall t \in T. f(t)
+%           \all<1>{t}{T}(f(t)) produces \forall t \in T.\big(f(t)\big)
+\NewDocumentCommand{\all}{D<>{auto} m g d()}{%
+	\forall\,#2%
+	\IfValueTF{#3}{\,{\in}\, #3\,}{}.
+	\IfValueTF{#4}{%
+		\bs{#1}{\left}( {#4} \bs{#1}{\right})
+	}{}
+}
+\NewDocumentCommand{\some}{t! D<>{auto} m g d()}{
+	\exists\IfBooleanTF{#1}{_{=1}}{}\,#3%
+	\IfValueTF{#4}{\,{\in}\, #4\,}{}.
+	\IfValueTF{#5}{%
+		\bs{#2}{\left}( {#5} \bs{#2}{\right})
+	}{}
+}
+
+%%% Assignments, relations and such
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Assignments
+% Example: x \dfeq 0 produces x := 0 with proper spacing
+\newcommand{\dfeq}{\coloneqq}
+% [rev]erse version of \dfeq
+% Example: S \ni x \dfeqrev 0 produces S \ni x =: 0 with proper spacing
+\newcommand{\dfeqrev}{=\mathrel{\mathop:}}
+% Example: X \dfeq ... :<=> with proper spacing
+\newcommand{\dfiff}{\;:\Longleftrightarrow\;}
+\newcommand{\enc}[2][auto]{\bs{#1}{\left}< #2 \bs{#1}{\right}>}
+\newcommand{\len}[2][auto]{\ensuremath{l} \bs{#1}{\left}( #2 \bs{#1}{\right})}
+% negated implication
+\newcommand{\notimplies}{\centernot\implies}
+% negated equivalence
+\newcommand{\notiff}{\centernot\iff}
+
+%% Basic sets
+%%%%%%%%%%%%%
+
+\newcommand{\ID}{\mathbb{D}}
+\DeclareDocumentCommand{\IN}{t+}{\mathbb{N}\IfBooleanTF{#1}{_{+}}{}}
+\newcommand{\IQ}{\mathbb{Q}}
+\DeclareDocumentCommand{\IR}{t+ t-}{\mathbb{R}%
+	\IfBooleanTF{#1}{_{+}}{}%
+	\IfBooleanTF{#2}{_{-}}{}
+}
+\newcommand{\extIR}{\overline{\IR}}
+\newcommand{\IC}{\mathbb{C}}
+\newcommand{\IZ}{\mathbb{Z}}
+% Space of polynomials with arbitrary but finite degree
+% #1 = degree bound
+\DeclareDocumentCommand{\IP}{g d[]}{%
+	\mathbb{P}\IfValueTF{#1}{_{#1}}{}\IfValueTF{#2}{[#2]}{}
+}
+
+% Intervals: closed-closed (cciv), open-closed (ociv), closed-open (coiv)
+%            and open-open (ooiv)
+\newcommand{\interval}[5][auto]{%
+	{\bs{#1}{\left}#2 {#4},{#5} \bs{#1}{\right}#3}
+}
+\newcommand{\cciv}[3][auto]{\interval[#1]{[}{]}{#2}{#3}}
+\newcommand{\ociv}[3][auto]{\interval[#1]{]}{]}{#2}{#3}}
+\newcommand{\coiv}[3][auto]{\interval[#1]{[}{[}{#2}{#3}}
+\newcommand{\ooiv}[3][auto]{\interval[#1]{]}{[}{#2}{#3}}
+
+%% Sets and set functions
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Shortcut for sets
+% Example: \st<brace size>{x \in S}{x \neq 0} produces
+%          \{ x \in S \mid x \neq 0 \}
+% Notice:  The second argument is optional and thusly allows to create sets
+%          like \{ 0, 1, 2, \dots \} via \st{0,1,2,\dots}
+\NewDocumentCommand{\st}{D<>{auto} m g}{%
+	\bsx<#1>\{(%
+		#2 \IfValueTF{#3}{ \; \bs{#1}{\middle}| \; #3 }{}%
+	)\}
+}
+
+% Distance function w.r.t. the specified norm
+% Usage: \dist[norm]{set}(point)
+% TODO Bracket size
+\NewDocumentCommand{\dist}{o g d()}{%
+	d_{%
+		\IfValueTF{#1}{%
+			#1 \IfValueTF{#2}{,#2}{}
+		}{%
+			\IfValueTF{#2}{#2}{}
+		}
+	}%
+	\IfValueTF{#3}{%
+		\bs{auto}{\left}( #3 \bs{auto}{\right})%
+	}{}
+}
+% \Hdist[norm]{sets}
+\NewDocumentCommand{\Hdist}{O{\empty} D(){\empty}}{%
+	\mathrm{d}_{\mathrm{H}\ifempty{#1}{}{,#1}}%
+	\ifempty{#2}{}{(#2)}
+}
+% Absolute value function
+% Usage: \abs<brace size>{value}
+\NewDocumentCommand{\abs}{D<>{auto} r()}{ \bsx<#1>|(#2)| }
+
+
+%%% Topological notions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Boundary of the closure of a set
+\newcommand{\boundary}{\partial}
+% Set of inner points of a set S
+% Usage: \inner{S}
+\newcommand{\inner}[1]{{#1}^\circ}
+
+% Generic norm
+% Usage: \norm<brace size>{point}[subscript, i.e., \infty]
+% Example: \norm{x}[1] produces ||x||_1
+\NewDocumentCommand{\norm}{D<>{auto} r() o}
+	{ \bsx<#1>\|(#2)\| \IfValueTF{#3}{_{#3}}{} }
+\NewDocumentCommand{\ndot}{o}{\norm<0>(\lparam)[#1]}
+
+\newcommand{\ball}{\mathrm{B}}
+% Topological closure
+\newcommand{\cls}[1]{\overline{#1}}
+% Closed balls
+% Usage: \clb<braket size>[a norm]{center}{radius}
+% TODO: Fix sig to D<> o m g
+\NewDocumentCommand{\clb}{D<>{auto} O{\empty} m g}{%
+	\cls{\ball}_{#2} \bs{#1}{\left}( #3 \IfValueTF{#4}{,#4}{} \bs{#1}{\right})
+}
+% Dual notion: open balls
+\NewDocumentCommand{\opb}{D<>{auto} O{\empty} m g}{%
+	\ball_{#2} \bs{#1}{\left}( #3 \IfValueTF{#4}{,#4}{} \bs{#1}{\right})
+}
+
+
+%%% Functions and function spaces
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Basic functions
+%%%%%%%%%%%%%%%%%%
+
+% Identity function
+% Example: \id[X] produces id_X
+\DeclareDocumentCommand{\id}{o}{\mathrm{id}\IfValueTF{#1}{_{#1}}{}}
+% Round to the closest integer
+\NewDocumentCommand{\round}{D<>{auto} r()}{%
+	\bs{#1}{\left}\lfloor #2 \bs{#1}{\right}\rceil
+}
+% Generic logarithm
+% Usage:    \logbx<o: bracket size>{logarithm name}(o: argument)
+% Examples: \logbx{\log_2} x  produces \log_2 x
+%           \logbx{\log_2}(x) produces \log_2(x)
+\NewDocumentCommand{\logbx}{D<>{auto} m d()}{%
+	#2\IfValueTF{#3}{\bs{#1}{\left}( #3 \bs{#1}{\right})}{}
+}
+% Usage: \logx<o: bracket size>[o: base](o: argument)
+\NewDocumentCommand{\logx}{D<>{auto} o d()}{\logbx<#1>{\log_{#2}}(#3)}
+% [l]og [b]inary: base-2 logarithm
+\NewDocumentCommand{\lb}{D<>{auto} d()}{\logbx<#1>{\mathrm{lb}}(#2)}
+
+%% Define functions with style
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% [d]e[f]ine [f]u[n]ction
+% Takes care of proper spacing between the function name and its domain.
+% Example: f \dffn X \to Y produces f : X \to Y
+\newcommand{\dffn}{\colon}
+% [d]e[f]ine a [par]tial [f]u[n]ction
+% Example: f \dfparfn X \to Y
+\newcommand{\dfparfn}{\colon\mathnormal\subseteq}
+% \to and \mapsto for multivalued functions
+% Example: f \dffn X \mto Y, x \mmapsto S
+\newcommand{\mto}{\rightrightarrows}
+\newcommand{\mmapsto}{\Mapsto}
+% Arrow indicating an injective function
+\newcommand{\into}{\rightarrowtail}
+% Arrow indicating a surjective function
+\newcommand{\surto}{\twoheadrightarrow}
+
+%% Function classes
+%%%%%%%%%%%%%%%%%%%
+
+% meta-command for proper typesetting properties of functions, like domain,
+% co-domain, image etc.
+\DeclareDocumentCommand{\funDefProp}{m D<>{auto} d()}{%
+	\mathrm{#1} \IfValueTF{#3}{%
+	% TODO Fix
+	\bs{#2}{\left}( #3 \bs{#2}{\right})
+	%	\bsx{#2}{{(}}(#3){{)}}%
+	}{}%
+}
+\DeclareDocumentCommand{\dom}{D<>{auto} d()}{\funDefProp{dom}<#1>(#2)}
+\DeclareDocumentCommand{\cod}{D<>{auto} d()}{\funDefProp{cod}<#1>(#2)}
+\DeclareDocumentCommand{\img}{D<>{auto} d()}{\funDefProp{img}<#1>(#2)}
+
+% Typograpical convention: set function classes upright
+\newcommand{\fnClassTypo}[1]{\mathrm{#1}}
+% Meta-command for creating common function classes; like the class of
+% continuous or smooth functions
+% Usage:
+% \fnClass*{letter}<bracket size>(top ann)[bottom ann]{domain}{co domain}
+% The starred version surpresses the brackets around the argument(s)
+\DeclareDocumentCommand{\fnClass}{s m D<>{auto} d() o m g}{%
+	#2\IfValueTF{#4}{^{#4}}{}%
+	  \IfValueTF{#5}{_{#5}}{}%
+	\bsx<#3>(( #6 \IfValueTF{#7}{, #7}{} ))
+}
+% Class of [c]continuous [f]u[n]ctions
+% Example: \cfn()[]{}{}
+\DeclareDocumentCommand{\cfn}{D<>{auto} d() o m g}{%
+	\fnClass{\fnClassTypo{C}}<#1>(#2)[#3]{#4}{#5}}
+\DeclareDocumentCommand{\civ}{d() g r[]}{%
+	\fnClass*{\fnClassTypo{C}}(#1)[#2]{[{#3}]}}
+%% Class of [a]nalytic [f]u[n]ctions
+\DeclareDocumentCommand{\afn}{D<>{auto} o m g}{%
+	\fnClass{\fnClassTypo{C}}<#1>(\omega)[#2]{#3}{#4}}
+\DeclareDocumentCommand{\aiv}{d() r[]}{%
+	\fnClass*{\fnClassTypo{C}}(\omega)[#1]{[#2]}}
+
+
+%%% Numerical operators
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% How to typeset operator symbols
+\newcommand{\operatorTypo}[1]{\mathrm{#1}}
+
+% [d]ifferential [op]erator
+% Usage:
+\NewDocumentCommand{\dopItem}{r()}{ \,\operatorTypo{d}#1 }
+\newcommand{\dopProcessList}[1]{\dopItem(#1)}
+\NewDocumentCommand{\dop}{>{\SplitList{,}} r()}
+	{ \ProcessList{#1}{\dopProcessList} }
+% Differentiating a function
+% Usage:    \diff{function}[k: k-th derivative (default: 1)]
+% Examples: \diff{f} produces f'
+%           \diff{f}[2] produces f^{(2)}
+\NewDocumentCommand{\diff}{m D[]{1}}{
+	\IfInteger{#2}{%
+		\ifnum #2 = 1%
+			#1^\prime%
+		\else%
+			#1^{(#2)}%
+		\fi%
+	}{%
+		#1^{(#2)}
+	}
+}
+% [p]artial [d]ifferential [o]perator
+% Usage: \pdo[o:variable]{function}(o:point to differentiate at)
+\DeclareDocumentCommand{\pdo}{o m d()}{%
+	\mathrm{D}\IfValueTF{#1}{_{#1}}{} #2 \IfValueTF{#3}{%
+		\bsx<auto>((#3))%
+	}{}
+}
+
+
+%%% Miscellaneous
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Truncated factorial: \fcut{m}{k} = m * (m-1) * ... * (m-k+1)
+% (different notation: search web for "Pochhammer symbol")
+\DeclareDocumentCommand{\fcut}{m m}{#1^{[#2]}}
+\DeclareDocumentCommand{\negfcut}{m m}{#1^{-[#2]}}
+
+\DeclareDocumentCommand{\pow}{D<>{auto} d()}{%
+	\mathfrak{P}\IfValueTF{#2}{\bs{#1}{\left}( #2 \bs{#1}{\right})}{}
+}
+
+% transposition
+% Example: \T{x} produces x^T
+\newcommand{\T}[1]{{#1}^\intercal}
+
+%% Classes of asymptotic run times
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newcommand{\landauSymbName}[1]{\mathcal{#1}}
+\NewDocumentCommand{\landauSymb}{D<>{auto} m d()}{
+	#2\IfValueTF{#3}{\bsx<#1>((#3))}{}
+}
+\NewDocumentCommand{\bigO}{D<>{auto} d()}{\landauSymb<#1>{\mathcal{O}}(#2)}
+\NewDocumentCommand{\litO}{D<>{auto} d()}{\landauSymb<#1>{o}(#2)}
+
+
+\endinput
